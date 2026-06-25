@@ -133,39 +133,15 @@ def delete_subscription(request, sub_id):
 @login_required
 def test_notify(request):
     try:
-        from django.core.mail import send_mail
-        from django.conf import settings
+        from .utils import check_and_notify
         from django.contrib import messages
-        
-        # 1. Gửi Email Test
-        if request.user.email:
-            send_mail(
-                "Xác nhận kết nối hệ thống cảnh báo cúp điện",
-                f"Chào {request.user.username},\n\nTính năng thông báo qua Email của bạn đã được thiết lập thành công!\n\nTừ giờ, hệ thống sẽ tự động gửi thông báo cho bạn ngay khi phát hiện có lịch cúp điện tại khu vực mà bạn đang theo dõi.\n\nTrân trọng,\nĐội ngũ quản trị.",
-                settings.DEFAULT_FROM_EMAIL,
-                [request.user.email],
-                fail_silently=False,
-            )
-            
-        # 2. Gửi Web Push Test
-        try:
-            from webpush import send_user_notification
-            payload = {
-                "head": "Kết nối thành công!",
-                "body": "Bạn sẽ nhận được cảnh báo ngay khi khu vực của bạn có lịch cúp điện.",
-                "icon": "https://lichcupdien.org/favicon.ico",
-                "url": "/subscriptions/"
-            }
-            send_user_notification(user=request.user, payload=payload, ttl=1000)
-        except Exception as e:
-            print("Web push test failed:", e)
-
-        messages.success(request, "Đã gửi thông báo test thành công! Hãy kiểm tra Email và Web Push của bạn.")
+        check_and_notify()
+        messages.success(request, "Đã chạy tiến trình kiểm tra và gửi thông báo cúp điện thành công!")
         return redirect('manage_subscriptions')
     except Exception as e:
         import traceback
         from django.http import HttpResponse
-        return HttpResponse(f"Error sending test notification:<br><br><b>{e}</b><br><br><pre>{traceback.format_exc()}</pre>", status=500)
+        return HttpResponse(f"Error:<br><br><b>{e}</b><br><br><pre>{traceback.format_exc()}</pre>", status=500)
 
 def get_areas(request):
     import csv
