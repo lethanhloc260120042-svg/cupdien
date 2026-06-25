@@ -36,17 +36,17 @@ def normalize_vn_text(text):
     if not text: return ""
     return unicodedata.normalize('NFC', str(text)).lower().strip()
 
-def check_and_notify():
-    """
-    Tìm kiếm lịch cúp điện trong 7 ngày tới, đối chiếu với Subscriptions của User
-    để gửi email thông báo.
-    """
-    today = timezone.localdate()
-    # Lấy lịch trong 7 ngày tới
-    upcoming_outages = OutageData.objects.filter(date__gte=today, date__lte=today + timezone.timedelta(days=7))
+def check_and_notify(target_user=None):
+    from .models import OutageData, UserSubscription
+    from django.core.mail import send_mail
+    from django.conf import settings
+    from django.utils import timezone
+    from datetime import timedelta
     
-    if not upcoming_outages.exists():
-        return
+    # 1. Lấy lịch cúp điện trong 3 ngày tới
+    today = timezone.localdate()
+    seven_days_later = today + timedelta(days=7)
+    upcoming_outages = OutageData.objects.filter(date__gte=today, date__lte=seven_days_later).order_by('date', 'start_time')
 
     # Gom nhóm thông báo theo User -> Subscription -> Outages
     user_notifications = {}
@@ -54,7 +54,10 @@ def check_and_notify():
     
     for outage in upcoming_outages:
         out_area_norm = normalize_vn_text(outage.area)
-        matching_subs = UserSubscription.objects.all()
+        if target_user:
+            matching_subs = UserSubscription.objects.filter(user=target_user)
+        else:
+            matching_subs = UserSubscription.objects.all()
         
         for sub in matching_subs:
             ward_clean = normalize_vn_text(sub.ward_name).replace("phường ", "").replace("xã ", "").replace("thị trấn ", "").strip()

@@ -142,8 +142,8 @@ def test_notify(request):
     try:
         from .utils import check_and_notify
         from django.contrib import messages
-        check_and_notify()
-        messages.success(request, "Đã chạy tiến trình kiểm tra và gửi thông báo cúp điện thành công!")
+        check_and_notify(target_user=request.user)
+        messages.success(request, "Đã chạy tiến trình kiểm tra và gửi thông báo cúp điện cho bạn thành công!")
         return redirect('manage_subscriptions')
     except Exception as e:
         import traceback
