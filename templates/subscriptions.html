@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+    
+    <!-- Header -->
+    <div class="flex items-center gap-4">
+        <a href="{% url 'dashboard' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-full transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        </a>
+        <div>
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                <h1 class="text-3xl font-bold text-gray-900 mb-1">Cấu hình Thông Báo</h1>
+                <a href="{% url 'test_notify' %}" class="inline-flex items-center gap-2 bg-green-100 text-green-700 hover:bg-green-200 px-4 py-2 rounded-xl text-sm font-medium transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                    Gửi Test Thông Báo Ngay
+                </a>
+            </div>
+            <p class="text-gray-500 mt-1">Quản lý danh sách khu vực và cài đặt nhận cảnh báo.</p>
+        </div>
+    </div>
+
+    <!-- Push Notification Toggle (UI Placeholder) -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+        <div>
+            <h3 class="text-lg font-semibold text-gray-900">Thông Báo Trình Duyệt</h3>
+            <p class="text-sm text-gray-500">Nhận thông báo push khi khu vực của bạn sắp bị cúp điện.</p>
+        </div>
+        {% load webpush_notifications %}
+        {% webpush_button with_class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-4 py-2 rounded-lg text-sm font-medium transition" %}
+    </div>
+
+    <!-- Subscription List -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Khu vực đang theo dõi</h3>
+        {% if sub_data %}
+            <div class="space-y-6">
+            {% for item in sub_data %}
+                <details class="group bg-gray-50 rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                    <summary class="flex items-center justify-between p-4 bg-gray-100 border-b border-gray-200 cursor-pointer hover:bg-gray-200 transition">
+                        <div>
+                            <p class="font-medium text-gray-900">
+                                {{ item.sub.ward_name }}
+                                {% if item.sub.area_name %}
+                                <span class="text-blue-600 font-bold ml-1">({{ item.sub.area_name }})</span>
+                                {% endif %}
+                            </p>
+                            <p class="text-sm text-gray-500">{{ item.sub.district_name }}, {{ item.sub.province_name }}</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="text-sm text-gray-500">
+                                <span class="group-open:hidden">Hiển thị lịch ▼</span>
+                                <span class="hidden group-open:inline">Thu gọn ▲</span>
+                            </div>
+                            <form method="post" action="{% url 'delete_subscription' item.sub.id %}" class="inline" onclick="event.stopPropagation();">
+                                {% csrf_token %}
+                                <button type="submit" class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition" title="Xoá">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </form>
+                        </div>
+                    </summary>
+                    
+                    <div class="p-4 bg-white">
+                        {% if item.outages %}
+                            <h4 class="text-sm font-semibold text-red-600 mb-3">⚡ Lịch cúp điện sắp tới:</h4>
+                            <div class="space-y-2">
+                                {% for o in item.outages %}
+                                <a href="{% url 'outage_detail' o.id %}" class="block bg-gray-50 border border-red-100 rounded-lg p-3 text-sm flex flex-col sm:flex-row sm:items-start justify-between gap-2 hover:bg-red-50 hover:border-red-200 transition cursor-pointer">
+                                    <div>
+                                        <span class="font-bold text-gray-900">{{ o.date|date:"d/m/Y" }}</span> 
+                                        <span class="text-gray-500 ml-2">{{ o.start_time|time:"H:i" }} - {{ o.end_time|time:"H:i" }}</span>
+                                        <p class="text-gray-900 font-medium mt-1 mb-1 line-clamp-1" title="{{ o.area }}">{{ o.area }}</p>
+                                        {% if o.reason %}
+                                            <p class="text-gray-500 mt-1 border-t border-gray-100 pt-1 line-clamp-1" title="{{ o.reason }}"><span class="font-medium">Lý do:</span> {{ o.reason }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="text-blue-600 self-end sm:self-center mt-2 sm:mt-0 flex-shrink-0">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                    </div>
+                                </a>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-sm text-gray-500 italic">Chưa có lịch cúp điện nào cho khu vực này trong những ngày tới.</p>
+                        {% endif %}
+                    </div>
+                </details>
+            {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-6 text-gray-500 text-sm">
+                Bạn chưa theo dõi khu vực nào.
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Add New Form -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Thêm khu vực theo dõi</h3>
+        
+        <form method="post" action="{% url 'manage_subscriptions' %}" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="province_name" id="province_name">
+            <input type="hidden" name="district_name" id="district_name">
+            <input type="hidden" name="ward_name" id="ward_name">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tỉnh/Thành <span class="text-red-500">*</span></label>
+                    <select name="province_code" id="province" required class="w-full rounded-lg border-gray-300 border p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Chọn Tỉnh/Thành</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Quận/Huyện <span class="text-red-500">*</span></label>
+                    <select name="district_code" id="district" required disabled class="w-full rounded-lg border-gray-300 border p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 disabled:opacity-50">
+                        <option value="">Chọn Quận/Huyện</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Phường/Xã <span class="text-red-500">*</span></label>
+                    <select name="ward_code" id="ward" required disabled class="w-full rounded-lg border-gray-300 border p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 disabled:opacity-50">
+                        <option value="">Chọn Phường/Xã</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Khu vực / Ấp (Tùy chọn)</label>
+                    <select name="area_name" id="area_name" disabled class="w-full rounded-lg border-gray-300 border p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 disabled:opacity-50">
+                        <option value="">Chọn Khu vực / Ấp</option>
+                    </select>
+                </div>
+            </div>
+
+            <p class="text-xs text-gray-500">
+                Lưu ý: Bạn có thể bỏ trống "Khu vực / Ấp" để nhận mọi thông báo của Phường. Nếu nhập, hệ thống sẽ lọc chính xác khu vực đó.
+            </p>
+
+            <div class="flex justify-end pt-2">
+                <button type="submit" class="bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition shadow-sm">
+                    Lưu khu vực
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const provinceSelect = document.getElementById('province');
+    const districtSelect = document.getElementById('district');
+    const wardSelect = document.getElementById('ward');
+    const areaSelect = document.getElementById('area_name');
+
+    const provinceNameInput = document.getElementById('province_name');
+    const districtNameInput = document.getElementById('district_name');
+    const wardNameInput = document.getElementById('ward_name');
+
+    // Hardcode Cần Thơ (Mã 92)
+    provinceSelect.innerHTML = '<option value="92">Thành phố Cần Thơ</option>';
+    provinceSelect.value = "92";
+    provinceNameInput.value = "Thành phố Cần Thơ";
+    
+    // Tự động tải Quận/Huyện của Cần Thơ
+    fetch(`https://provinces.open-api.vn/api/p/92?depth=2`)
+        .then(res => res.json())
+        .then(data => {
+            data.districts.forEach(d => {
+                let option = new Option(d.name, d.code);
+                districtSelect.add(option);
+            });
+            districtSelect.disabled = false;
+            districtSelect.classList.remove('bg-gray-50');
+        });
+
+    districtSelect.addEventListener('change', function() {
+        wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+        wardSelect.disabled = true;
+        wardSelect.classList.add('bg-gray-50');
+        
+        areaSelect.innerHTML = '<option value="">Chọn Khu vực / Ấp</option>';
+        areaSelect.disabled = true;
+        areaSelect.classList.add('bg-gray-50');
+        
+        if(this.value) {
+            districtNameInput.value = this.options[this.selectedIndex].text;
+            fetch(`https://provinces.open-api.vn/api/d/${this.value}?depth=2`)
+                .then(res => res.json())
+                .then(data => {
+                    data.wards.forEach(w => {
+                        let option = new Option(w.name, w.code);
+                        wardSelect.add(option);
+                    });
+                    wardSelect.disabled = false;
+                    wardSelect.classList.remove('bg-gray-50');
+                });
+        }
+    });
+
+    wardSelect.addEventListener('change', function() {
+        areaSelect.innerHTML = '<option value="">Chọn Khu vực / Ấp</option>';
+        areaSelect.disabled = true;
+        areaSelect.classList.add('bg-gray-50');
+        
+        if(this.value) {
+            wardNameInput.value = this.options[this.selectedIndex].text;
+            
+            // Lấy danh sách Khu vực / Ấp từ Backend
+            const distName = districtNameInput.value;
+            const wardName = wardNameInput.value;
+            
+            fetch(`/api/areas/?district=${encodeURIComponent(distName)}&ward=${encodeURIComponent(wardName)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.areas && data.areas.length > 0) {
+                        data.areas.forEach(a => {
+                            let option = new Option(a, a);
+                            areaSelect.add(option);
+                        });
+                        areaSelect.disabled = false;
+                        areaSelect.classList.remove('bg-gray-50');
+                    } else {
+                        // Nếu không có dữ liệu khu vực cho phường này, giữ disabled nhưng đổi text
+                        areaSelect.innerHTML = '<option value="">(Không có dữ liệu chi tiết)</option>';
+                    }
+                });
+        }
+    });
+});
+</script>
+{% endblock %}

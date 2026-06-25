@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Lịch Cúp Điện</h1>
+        <p class="text-gray-500">Xem danh sách toàn bộ lịch cúp điện hoặc lịch riêng của khu vực bạn theo dõi.</p>
+    </div>
+    <div>
+        <a href="{% url 'manage_subscriptions' %}" class="inline-flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 px-5 py-2.5 rounded-xl font-medium transition shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+            Nhận thông báo cúp điện
+        </a>
+    </div>
+</div>
+
+{% if has_subscriptions %}
+    <div class="mb-10">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <span class="text-red-500">⚡</span> Khu vực của bạn
+        </h2>
+        
+        {% if personalized_outages %}
+            <div class="space-y-6">
+                {% for po in personalized_outages %}
+                <div class="bg-blue-50 border border-blue-100 rounded-2xl p-6">
+                    <h3 class="text-lg font-bold text-blue-900 mb-4">{{ po.subscription.ward_name }} - {{ po.subscription.district_name }}</h3>
+                    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {% for item in po.outages %}
+                        <div class="bg-white rounded-xl shadow-sm border border-blue-50 p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="px-3 py-1 bg-red-50 text-red-600 text-xs font-bold rounded-full border border-red-100">
+                                    {{ item.date|date:"d/m/Y" }}
+                                </span>
+                            </div>
+                            <h4 class="font-semibold text-gray-900 mb-2 line-clamp-2" title="{{ item.area }}">{{ item.area }}</h4>
+                            <div class="flex items-center gap-2 text-sm text-gray-600 mb-3">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span>{{ item.start_time|time:"H:i" }} - {{ item.end_time|time:"H:i" }}</span>
+                            </div>
+                            {% if item.reason %}
+                            <div class="text-sm text-gray-500 border-t border-gray-100 pt-3 mt-1">
+                                <span class="font-medium">Lý do:</span> {{ item.reason }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-gray-50 rounded-2xl border border-gray-100 p-6 text-center text-gray-500">
+                Chúc mừng! Không có lịch cúp điện nào sắp tới tại các khu vực bạn đang theo dõi.
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
+
+<div>
+    <h2 class="text-2xl font-bold text-gray-900 mb-4">Tất cả lịch cúp điện</h2>
+    {% if all_outages %}
+        {% regroup all_outages by district as grouped_outages %}
+        <div class="space-y-4">
+            {% for group in grouped_outages %}
+            <details class="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" {% if not has_subscriptions and forloop.first %}open{% endif %}>
+                <summary class="flex items-center justify-between p-6 cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
+                    <h3 class="text-lg font-bold text-gray-900">{{ group.grouper }}</h3>
+                    <span class="bg-gray-200 text-gray-700 py-1 px-3 rounded-full text-sm font-semibold">{{ group.list|length }} lịch</span>
+                </summary>
+                <div class="p-6 border-t border-gray-100 bg-white">
+                    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {% for item in group.list %}
+                        <a href="{% url 'outage_detail' item.id %}" class="block border border-gray-100 rounded-xl p-5 hover:shadow-md transition hover:border-gray-200">
+                            <div class="mb-3">
+                                <span class="px-3 py-1 bg-gray-100 text-gray-800 text-xs font-bold rounded-full">
+                                    {{ item.date|date:"d/m/Y" }}
+                                </span>
+                            </div>
+                            <h4 class="text-md font-semibold text-gray-900 mb-2 line-clamp-2" title="{{ item.area }}">{{ item.area }}</h4>
+                            <div class="flex items-center gap-2 text-sm text-gray-600 mb-3">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span>{{ item.start_time|time:"H:i" }} - {{ item.end_time|time:"H:i" }}</span>
+                            </div>
+                            {% if item.reason %}
+                            <div class="text-sm text-gray-500 border-t border-gray-100 pt-3 mt-1">
+                                <span class="font-medium">Lý do:</span> {{ item.reason }}
+                            </div>
+                            {% endif %}
+                            {% if item.status %}
+                            <div class="text-sm mt-1">
+                                <span class="font-medium text-gray-700">Trạng thái:</span> 
+                                <span class="{% if item.status == 'Đã duyệt' %}text-green-600{% else %}text-orange-500{% endif %} font-medium">{{ item.status }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </details>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center max-w-2xl mx-auto mt-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Chưa có lịch cúp điện mới</h3>
+            <p class="text-gray-500">Hiện tại hệ thống không ghi nhận lịch cúp điện nào trong những ngày tới.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
