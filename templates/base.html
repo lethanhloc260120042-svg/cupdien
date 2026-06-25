@@ -59,17 +59,17 @@
                         <span class="font-semibold text-xl tracking-tight">CúpĐiện</span>
                     </a>
                 </div>
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2 sm:space-x-4">
                     {% if user.is_authenticated %}
-                        <span class="text-sm text-gray-500">Xin chào, {{ user.username }}</span>
-                        <a href="/dashboard/" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition">Dashboard</a>
+                        <span class="hidden sm:inline text-sm text-gray-500 truncate max-w-[120px]" title="{{ user.username }}">Chào, {{ user.username }}</span>
+                        <a href="/dashboard/" class="text-gray-600 hover:text-blue-600 px-2 sm:px-3 py-2 rounded-md text-sm font-medium transition">Dashboard</a>
                         <form method="post" action="{% url 'account_logout' %}" class="inline">
                             {% csrf_token %}
-                            <button type="submit" class="bg-gray-100 text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-medium transition">Đăng xuất</button>
+                            <button type="submit" class="bg-gray-100 text-gray-700 hover:bg-gray-200 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition">Thoát</button>
                         </form>
                     {% else %}
                         {% load socialaccount %}
-                        <a href="{% provider_login_url 'google' %}" class="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm">Đăng nhập bằng Google</a>
+                        <a href="{% provider_login_url 'google' %}" class="bg-blue-600 text-white hover:bg-blue-700 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm whitespace-nowrap">Đăng nhập</a>
                     {% endif %}
                 </div>
             </div>
