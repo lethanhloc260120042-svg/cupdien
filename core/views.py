@@ -5,22 +5,7 @@ from .models import OutageData, UserSubscription
 from .utils import get_ward_mapping, normalize_vn_text
 
 def home(request):
-    if request.user.is_authenticated:
-        return redirect('dashboard')
-    today = timezone.localdate()
-    outages = OutageData.objects.filter(date__gte=today).order_by('date', 'start_time')
-    
-    # Group manually to handle district name variations
-    grouped = {}
-    for o in outages:
-        dist = o.district.replace("Lịch cúp điện ", "")
-        if dist not in grouped:
-            grouped[dist] = []
-        grouped[dist].append(o)
-        
-    grouped_outages = [{'grouper': k, 'list': v} for k, v in sorted(grouped.items())]
-    
-    return render(request, 'home.html', {'grouped_outages': grouped_outages})
+    return redirect('dashboard')
 
 def dashboard(request):
     today = timezone.localdate()
