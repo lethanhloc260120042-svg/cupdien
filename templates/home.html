@@ -20,7 +20,7 @@
             <div class="p-6 border-t border-gray-100 bg-white">
                 <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {% for item in group.list %}
-                    <div class="border border-gray-100 rounded-xl p-5 hover:shadow-md transition bg-gray-50">
+                    <a href="{% url 'outage_detail' item.id %}" class="block border border-gray-100 rounded-xl p-5 hover:shadow-md transition hover:border-gray-300 bg-gray-50">
                         <div class="flex items-center justify-between mb-3">
                             <span class="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full">
                                 {{ item.date|date:"d/m/Y" }}
@@ -48,7 +48,7 @@
                             </span>
                         </div>
                         {% endif %}
-                    </div>
+                    </a>
                     {% endfor %}
                 </div>
             </div>
