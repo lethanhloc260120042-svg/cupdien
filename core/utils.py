@@ -102,11 +102,17 @@ def check_and_notify():
             message += f"📍 Lịch cúp điện tại: {sub_title}\n"
             message += "=" * 40 + "\n"
             
+            seen_outages = set()
             for o in outages:
+                o_signature = f"{o.date}_{o.start_time}_{o.end_time}_{normalize_vn_text(o.area)}"
+                if o_signature in seen_outages:
+                    continue
+                seen_outages.add(o_signature)
+                
                 message += f"- Ngày: {o.date.strftime('%d/%m/%Y')} | {o.start_time.strftime('%H:%M')} - {o.end_time.strftime('%H:%M')}\n"
-                message += f"  Khu vực: {o.area}\n"
+                message += f"  Khu vực: {o.area.strip()}\n"
                 if o.reason:
-                    message += f"  Lý do: {o.reason}\n"
+                    message += f"  Lý do: {o.reason.strip()}\n"
                 message += "-" * 30 + "\n"
             message += "\n"
             
