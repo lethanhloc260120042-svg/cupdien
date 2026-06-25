@@ -163,3 +163,4 @@ WEBPUSH_SETTINGS = {
     "VAPID_PRIVATE_KEY": os.environ.get('VAPID_PRIVATE_KEY'),
     "VAPID_ADMIN_EMAIL": "admin@example.com"
 }
+SOCIALACCOUNT_LOGIN_ON_GET = True
