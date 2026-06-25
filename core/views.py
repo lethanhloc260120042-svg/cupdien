@@ -8,8 +8,19 @@ def home(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
     today = timezone.localdate()
-    outages = OutageData.objects.filter(date__gte=today).order_by('district', 'date', 'start_time')
-    return render(request, 'home.html', {'outages': outages})
+    outages = OutageData.objects.filter(date__gte=today).order_by('date', 'start_time')
+    
+    # Group manually to handle district name variations
+    grouped = {}
+    for o in outages:
+        dist = o.district.replace("Lịch cúp điện ", "")
+        if dist not in grouped:
+            grouped[dist] = []
+        grouped[dist].append(o)
+        
+    grouped_outages = [{'grouper': k, 'list': v} for k, v in sorted(grouped.items())]
+    
+    return render(request, 'home.html', {'grouped_outages': grouped_outages})
 
 @login_required
 def dashboard(request):
@@ -51,8 +62,17 @@ def dashboard(request):
                 'outages': sub_outages
             })
             
+    grouped = {}
+    for o in all_outages:
+        dist = o.district.replace("Lịch cúp điện ", "")
+        if dist not in grouped:
+            grouped[dist] = []
+        grouped[dist].append(o)
+        
+    grouped_all_outages = [{'grouper': k, 'list': v} for k, v in sorted(grouped.items())]
+            
     return render(request, 'dashboard.html', {
-        'all_outages': all_outages,
+        'all_outages': grouped_all_outages,
         'personalized_outages': personalized_outages,
         'has_subscriptions': subscriptions.exists()
     })

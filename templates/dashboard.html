@@ -60,9 +60,8 @@
 <div>
     <h2 class="text-2xl font-bold text-gray-900 mb-4">Tất cả lịch cúp điện</h2>
     {% if all_outages %}
-        {% regroup all_outages by district as grouped_outages %}
         <div class="space-y-4">
-            {% for group in grouped_outages %}
+            {% for group in all_outages %}
             <details class="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" {% if not has_subscriptions and forloop.first %}open{% endif %}>
                 <summary class="flex items-center justify-between p-6 cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
                     <h3 class="text-lg font-bold text-gray-900">{{ group.grouper }}</h3>
