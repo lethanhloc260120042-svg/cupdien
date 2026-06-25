@@ -132,11 +132,16 @@ def delete_subscription(request, sub_id):
 
 @login_required
 def test_notify(request):
-    from .utils import check_and_notify
-    from django.contrib import messages
-    check_and_notify()
-    messages.success(request, "Đã gửi thông báo test thành công! Hãy kiểm tra Email và Web Push của bạn.")
-    return redirect('manage_subscriptions')
+    try:
+        from .utils import check_and_notify
+        from django.contrib import messages
+        check_and_notify()
+        messages.success(request, "Đã gửi thông báo test thành công! Hãy kiểm tra Email và Web Push của bạn.")
+        return redirect('manage_subscriptions')
+    except Exception as e:
+        import traceback
+        from django.http import HttpResponse
+        return HttpResponse(f"Error: {e}<br><pre>{traceback.format_exc()}</pre>", status=500)
 
 def get_areas(request):
     import csv
