@@ -22,12 +22,14 @@ def home(request):
     
     return render(request, 'home.html', {'grouped_outages': grouped_outages})
 
-@login_required
 def dashboard(request):
     today = timezone.localdate()
-    all_outages = OutageData.objects.filter(date__gte=today).order_by('district', 'date', 'start_time')
+    all_outages = OutageData.objects.filter(date__gte=today).order_by('date', 'start_time')
     
-    subscriptions = UserSubscription.objects.filter(user=request.user)
+    if request.user.is_authenticated:
+        subscriptions = UserSubscription.objects.filter(user=request.user)
+    else:
+        subscriptions = UserSubscription.objects.none()
     
     personalized_outages = []
     from .utils import get_ward_mapping, normalize_vn_text
