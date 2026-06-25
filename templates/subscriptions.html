@@ -30,6 +30,25 @@
         {% webpush_button with_class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-4 py-2 rounded-lg text-sm font-medium transition" %}
     </div>
 
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            var pushBtn = document.getElementById('webpush-subscribe-button');
+            if (pushBtn) {
+                pushBtn.addEventListener('click', function(e) {
+                    if (!('serviceWorker' in navigator)) {
+                        alert('Trình duyệt của bạn không hỗ trợ nhận thông báo (thiếu Service Worker). Hãy thử dùng Chrome/Safari bản mới nhất.');
+                    } else if (!('PushManager' in window)) {
+                        alert('Trình duyệt của bạn không hỗ trợ Thông báo Đẩy. Trên iPhone/iPad, bạn cần chọn "Thêm vào Màn hình chính" (Add to Home Screen) trước rồi mở app từ màn hình chính để bật thông báo nhé!');
+                    } else if (Notification.permission === 'denied') {
+                        alert('Bạn đã lỡ tay chặn thông báo mất rồi. Vui lòng vào Cài đặt trình duyệt -> Tìm trang web này -> Bật Cho phép Thông báo.');
+                    }
+                });
+            }
+        }, 1000);
+    });
+    </script>
+
     <!-- Subscription List -->
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">Khu vực đang theo dõi</h3>
