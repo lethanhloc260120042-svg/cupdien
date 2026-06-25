@@ -156,6 +156,7 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'DevLearn <lethanhloc2612004@gmail.com>')
+EMAIL_TIMEOUT = 5
 
 # Webpush Settings
 WEBPUSH_SETTINGS = {
