@@ -140,8 +140,8 @@ def test_notify(request):
         # 1. Gửi Email Test
         if request.user.email:
             send_mail(
-                "⚡ Bíp bíp! Đây là tin nhắn Test từ hệ thống Lịch Cúp Điện",
-                f"Chào {request.user.username},\n\nHệ thống thông báo của bạn đang hoạt động cực kỳ tốt nha!\n\nEmail này dùng để kiểm tra cấu hình Resend API.",
+                "Xác nhận kết nối hệ thống cảnh báo cúp điện",
+                f"Chào {request.user.username},\n\nTính năng thông báo qua Email của bạn đã được thiết lập thành công!\n\nTừ giờ, hệ thống sẽ tự động gửi thông báo cho bạn ngay khi phát hiện có lịch cúp điện tại khu vực mà bạn đang theo dõi.\n\nTrân trọng,\nĐội ngũ quản trị.",
                 settings.DEFAULT_FROM_EMAIL,
                 [request.user.email],
                 fail_silently=False,
@@ -151,8 +151,8 @@ def test_notify(request):
         try:
             from webpush import send_user_notification
             payload = {
-                "head": "Ting ting! Test thành công",
-                "body": "Thông báo Web Push của bạn hoạt động ngon lành rồi nhé!",
+                "head": "Kết nối thành công!",
+                "body": "Bạn sẽ nhận được cảnh báo ngay khi khu vực của bạn có lịch cúp điện.",
                 "icon": "https://lichcupdien.org/favicon.ico",
                 "url": "/subscriptions/"
             }
