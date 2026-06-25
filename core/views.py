@@ -133,15 +133,39 @@ def delete_subscription(request, sub_id):
 @login_required
 def test_notify(request):
     try:
-        from .utils import check_and_notify
+        from django.core.mail import send_mail
+        from django.conf import settings
         from django.contrib import messages
-        check_and_notify()
+        
+        # 1. Gửi Email Test
+        if request.user.email:
+            send_mail(
+                "⚡ Bíp bíp! Đây là tin nhắn Test từ hệ thống Lịch Cúp Điện",
+                f"Chào {request.user.username},\n\nHệ thống thông báo của bạn đang hoạt động cực kỳ tốt nha!\n\nEmail này dùng để kiểm tra cấu hình Resend API.",
+                settings.DEFAULT_FROM_EMAIL,
+                [request.user.email],
+                fail_silently=False,
+            )
+            
+        # 2. Gửi Web Push Test
+        try:
+            from webpush import send_user_notification
+            payload = {
+                "head": "Ting ting! Test thành công",
+                "body": "Thông báo Web Push của bạn hoạt động ngon lành rồi nhé!",
+                "icon": "https://lichcupdien.org/favicon.ico",
+                "url": "/subscriptions/"
+            }
+            send_user_notification(user=request.user, payload=payload, ttl=1000)
+        except Exception as e:
+            print("Web push test failed:", e)
+
         messages.success(request, "Đã gửi thông báo test thành công! Hãy kiểm tra Email và Web Push của bạn.")
         return redirect('manage_subscriptions')
     except Exception as e:
         import traceback
         from django.http import HttpResponse
-        return HttpResponse(f"Error: {e}<br><pre>{traceback.format_exc()}</pre>", status=500)
+        return HttpResponse(f"Error sending test notification:<br><br><b>{e}</b><br><br><pre>{traceback.format_exc()}</pre>", status=500)
 
 def get_areas(request):
     import csv
