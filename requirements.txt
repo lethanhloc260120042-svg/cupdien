@@ -46,3 +46,4 @@ wsproto==1.3.2
 yarl==1.24.2
 gunicorn==22.0.0
 whitenoise==6.8.2
+django-anymail[resend]==11.1
